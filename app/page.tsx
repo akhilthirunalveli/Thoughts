@@ -3,12 +3,16 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import lzString from "lz-string";
 import "@theme-toggles/react/css/Around.css"
+
 import { Around } from "@theme-toggles/react"
+import { Share2, Check } from "lucide-react";
 
 export default function Home() {
     const [content, setContent] = useState("");
     const [theme, setTheme] = useState<"light" | "dark">("light");
     const [mounted, setMounted] = useState(false);
+
+    const [copied, setCopied] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const adjustHeight = useCallback(() => {
@@ -109,6 +113,15 @@ export default function Home() {
         }
     };
 
+    const handleShare = async () => {
+        try {
+            await navigator.clipboard.writeText(content);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error("Failed to copy:", err);
+        }
+    };
 
     if (!mounted) return null;
 
@@ -120,8 +133,17 @@ export default function Home() {
                     duration={750}
                     toggled={theme === "dark"}
                     toggle={toggleTheme}
+                    className="opacity-80"
                 />
             </div>
+
+            <button
+                onClick={handleShare}
+                className="absolute top-6 right-6 z-50 text-[var(--foreground)] transition-opacity duration-300 hover:opacity-75 font-chillax text-lg"
+                aria-label="Copy to clipboard"
+            >
+                {copied ? "Copied" : "Share"}
+            </button>
 
             <div className="w-full max-w-3xl flex-1 flex flex-col pt-16 pb-10">
                 <textarea
