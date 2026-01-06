@@ -1,17 +1,24 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google"; // Changed import
+import { Figtree, Lora, JetBrains_Mono } from "next/font/google"; // Import new fonts
 import "./globals.css";
+import { ControlPanel } from "./components/ControlPanel";
 
-// Configured Geist font
-const geistSans = Geist({
-    variable: "--font-geist-sans",
+const figtree = Figtree({
+    variable: "--font-figtree",
     subsets: ["latin"],
+    display: "swap",
 });
 
-// Configured Geist Mono font
-const geistMono = Geist_Mono({
-    variable: "--font-geist-mono",
+const lora = Lora({
+    variable: "--font-lora",
     subsets: ["latin"],
+    display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+    variable: "--font-jetbrains-mono",
+    subsets: ["latin"],
+    display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -27,10 +34,11 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body
-                className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+                className={`${figtree.variable} ${lora.variable} ${jetbrainsMono.variable} font-sans antialiased transition-all duration-300`}
                 suppressHydrationWarning
             >
                 {children}
+                <ControlPanel />
             </body>
         </html>
     );
