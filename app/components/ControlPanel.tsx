@@ -68,26 +68,20 @@ export function ControlPanel() {
     };
 
     const resetSettings = () => {
-        // Reset State
         setTheme("light");
         setFontFamily("sans");
         setFontSize(18);
-
-        // Reset Storage
         localStorage.removeItem("thoughts-theme");
         localStorage.removeItem("thoughts-font");
         localStorage.removeItem("thoughts-size");
-
-        // Reset DOM
         document.documentElement.classList.remove("dark");
         updateFontVariable("sans");
         document.documentElement.style.setProperty("--font-size-base", "18px");
     };
 
-    const toggleTheme = async () => {
-        const newTheme = theme === "light" ? "dark" : "light";
+    const toggleTheme = (newTheme: "light" | "dark") => {
+        if (theme === newTheme) return;
 
-        // Use View Transition API if available
         // @ts-ignore
         if (!document.startViewTransition) {
             setTheme(newTheme);
@@ -102,124 +96,125 @@ export function ControlPanel() {
             localStorage.setItem("thoughts-theme", newTheme);
             document.documentElement.classList.toggle("dark", newTheme === "dark");
         });
-
-        try {
-            await transition.ready;
-            const radius = Math.hypot(
-                Math.max(window.innerWidth, window.innerHeight)
-            );
-            const clipPath = [
-                `circle(0px at ${window.innerWidth}px 0px)`,
-                `circle(${radius}px at ${window.innerWidth}px 0px)`
-            ];
-
-            document.documentElement.animate(
-                { clipPath },
-                {
-                    duration: 500,
-                    easing: "ease-in-out",
-                    pseudoElement: "::view-transition-new(root)",
-                }
-            );
-        } catch (e) {
-            console.error("View transition failed", e);
-        }
     };
 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm transition-all animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 font-sans">
+            {/* Backdrop */}
             <div
-                className="w-full max-w-md bg-[var(--background)] border border-[var(--foreground)]/10 rounded-2xl shadow-2xl p-6 relative animate-in zoom-in-95 duration-200"
+                className="absolute inset-0 bg-neutral-900/20 dark:bg-black/40 transition-opacity animate-in fade-in duration-200"
+                onClick={() => setIsOpen(false)}
+            />
+
+            {/* Modal */}
+            <div
+                className="w-full max-w-[340px] relative z-10 overflow-hidden rounded-xl bg-white dark:bg-[#111] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-neutral-200/60 dark:border-neutral-800 transition-all animate-in zoom-in-95 fade-in duration-200 slide-in-from-bottom-2"
                 role="dialog"
                 aria-modal="true"
             >
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold font-sans">Control Panel</h2>
-                    <div className="flex items-center gap-2">
+                {/* Header */}
+                <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100 dark:border-neutral-800">
+                    <span className="text-[13px] font-medium text-neutral-500 dark:text-neutral-400">
+                        Preferences
+                    </span>
+                    <div className="flex items-center gap-1">
                         <button
                             onClick={resetSettings}
-                            className="p-2 hover:bg-[var(--foreground)]/5 rounded-full transition-colors text-[var(--foreground)]/60 hover:text-[var(--foreground)]"
-                            title="Reset to Defaults"
-                            aria-label="Reset to Defaults"
+                            className="p-1.5 rounded-md text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                            title="Reset"
                         >
-                            <RotateCcw size={18} />
+                            <RotateCcw size={13} strokeWidth={2} />
                         </button>
                         <button
                             onClick={() => setIsOpen(false)}
-                            className="p-2 hover:bg-[var(--foreground)]/5 rounded-full transition-colors"
-                            aria-label="Close"
+                            className="p-1.5 rounded-md text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 dark:hover:text-neutral-100 dark:hover:bg-neutral-800 transition-colors"
                         >
-                            <X size={20} />
+                            <X size={14} strokeWidth={2} />
                         </button>
                     </div>
                 </div>
 
-                <div className="space-y-4">
-                    {/* Theme Toggle */}
-                    <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--foreground)]/5 hover:bg-[var(--foreground)]/10 transition-colors">
-                        <div className="flex flex-col">
-                            <span className="font-medium flex items-center gap-2"><Sun size={16} /> Theme</span>
-                            <span className="text-sm text-[var(--foreground)]/60">
-                                {theme === "light" ? "Light Mode" : "Dark Mode"}
-                            </span>
+                <div className="p-4 space-y-5">
+                    {/* Theme */}
+                    <div className="flex items-center justify-between">
+                        <label className="text-[13px] font-medium text-neutral-900 dark:text-neutral-200">
+                            Appearance
+                        </label>
+                        <div className="flex bg-neutral-100 dark:bg-neutral-800 p-0.5 rounded-lg border border-neutral-200 dark:border-neutral-700/50">
+                            <button
+                                onClick={() => toggleTheme("light")}
+                                className={`px-3 py-1 rounded-md text-[13px] font-medium transition-all ${theme === 'light'
+                                        ? 'bg-white text-neutral-900 shadow-sm border border-neutral-200/50'
+                                        : 'text-neutral-500 hover:text-neutral-900 dark:text-neutral-400'
+                                    }`}
+                            >
+                                Light
+                            </button>
+                            <button
+                                onClick={() => toggleTheme("dark")}
+                                className={`px-3 py-1 rounded-md text-[13px] font-medium transition-all ${theme === 'dark'
+                                        ? 'bg-[#222] text-white shadow-sm border border-white/5'
+                                        : 'text-neutral-500 hover:text-neutral-900 dark:text-neutral-400'
+                                    }`}
+                            >
+                                Dark
+                            </button>
                         </div>
-                        <button
-                            onClick={toggleTheme}
-                            className="p-3 bg-[var(--background)] shadow-sm rounded-full hover:scale-105 transition-transform"
-                        >
-                            {theme === "light" ? <Sun size={20} /> : <Moon size={20} />}
-                        </button>
                     </div>
 
-                    {/* Font Family Selector */}
-                    <div className="p-4 rounded-xl bg-[var(--foreground)]/5 transition-colors">
-                        <div className="flex items-center gap-2 mb-3">
-                            <Type size={16} />
-                            <span className="font-medium">Font Style</span>
-                        </div>
+                    {/* Font Family */}
+                    <div className="space-y-2.5">
+                        <label className="text-[13px] font-medium text-neutral-900 dark:text-neutral-200">
+                            Typography
+                        </label>
                         <div className="grid grid-cols-3 gap-2">
                             {(["sans", "serif", "mono"] as const).map((font) => (
                                 <button
                                     key={font}
                                     onClick={() => handleFontChange(font)}
-                                    className={`px-3 py-2 rounded-lg text-sm transition-all ${fontFamily === font
-                                        ? "bg-[var(--foreground)] text-[var(--background)] shadow-sm"
-                                        : "hover:bg-[var(--foreground)]/10"
+                                    className={`px-3 py-2 rounded-lg text-[13px] font-medium border transition-all ${fontFamily === font
+                                            ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-black dark:border-white shadow-sm"
+                                            : "bg-white dark:bg-[#111] text-neutral-600 dark:text-neutral-400 border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700"
                                         }`}
                                 >
-                                    {font.charAt(0).toUpperCase() + font.slice(1)}
+                                    <span className={font === 'serif' ? 'font-serif' : font === 'mono' ? 'font-mono' : 'font-sans'}>
+                                        {font.charAt(0).toUpperCase() + font.slice(1)}
+                                    </span>
                                 </button>
                             ))}
                         </div>
                     </div>
 
-                    {/* Font Size Slider */}
-                    <div className="p-4 rounded-xl bg-[var(--foreground)]/5 transition-colors">
-                        <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2">
-                                <MoveVertical size={16} />
-                                <span className="font-medium">Font Size</span>
-                            </div>
-                            <span className="text-sm text-[var(--foreground)]/60 bg-[var(--background)] px-2 py-0.5 rounded-md shadow-sm">
+                    {/* Font Size */}
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <label className="text-[13px] font-medium text-neutral-900 dark:text-neutral-200">
+                                Size
+                            </label>
+                            <span className="text-[11px] font-mono text-neutral-500 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800 px-1.5 py-0.5 rounded border border-neutral-200 dark:border-neutral-700/50">
                                 {fontSize}px
                             </span>
                         </div>
-                        <input
-                            type="range"
-                            min="14"
-                            max="32"
-                            step="1"
-                            value={fontSize}
-                            onChange={handleFontSizeChange}
-                            className="w-full accent-[var(--foreground)] h-2 bg-[var(--foreground)]/10 rounded-lg appearance-none cursor-pointer"
-                        />
+                        <div className="flex items-center gap-3">
+                            <Type size={12} className="text-neutral-400" />
+                            <input
+                                type="range"
+                                min="14"
+                                max="32"
+                                step="1"
+                                value={fontSize}
+                                onChange={handleFontSizeChange}
+                                className="flex-1 h-1 bg-neutral-200 dark:bg-neutral-800 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-neutral-900 dark:[&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-white/20 [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110"
+                            />
+                            <Type size={16} className="text-neutral-400" />
+                        </div>
                     </div>
                 </div>
 
-                <div className="mt-6 text-center text-xs text-[var(--foreground)]/40">
-                    Press <kbd className="px-1.5 py-0.5 rounded bg-[var(--foreground)]/10">Esc</kbd> to close
+                <div className="bg-neutral-50 dark:bg-neutral-900/50 border-t border-neutral-100 dark:border-neutral-800 p-2 text-center">
+                    <p className="text-[10px] text-neutral-400 font-medium tracking-tight">Version 1.0</p>
                 </div>
             </div>
         </div>
