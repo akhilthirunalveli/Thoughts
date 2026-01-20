@@ -115,7 +115,9 @@ export default function Home() {
 
     const handleShare = async () => {
         try {
-            await navigator.clipboard.writeText(content);
+            const compressed = lzString.compressToEncodedURIComponent(content);
+            window.location.hash = compressed;
+            await navigator.clipboard.writeText(window.location.href);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         } catch (err) {
@@ -140,9 +142,9 @@ export default function Home() {
             <button
                 onClick={handleShare}
                 className="absolute top-6 right-6 z-50 text-[var(--foreground)] transition-opacity duration-300 hover:opacity-75 font-chillax text-lg"
-                aria-label="Copy to clipboard"
+                aria-label="Copy link to clipboard"
             >
-                {copied ? "Copied" : "Share"}
+                {copied ? "Link Copied" : "Share Link"}
             </button>
 
             <div className="w-full max-w-3xl flex-1 flex flex-col pt-16 pb-10">
